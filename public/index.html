@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intercom - Camarógrafo</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; transition: background-color 0.3s; }
+        #pantalla {
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; font-weight: bold; text-align: center;
+        }
+        #texto-comando { font-size: 8vw; margin-bottom: 20px; text-transform: uppercase; }
+        
+        .espera { background-color: #333; }
+        .al-aire { background-color: #ff0000; }
+        .prevenido { background-color: #ffcc00; color: black; }
+        
+        #btn-ok {
+            padding: 20px 40px; font-size: 24px; cursor: pointer;
+            background-color: white; color: black; border: none; border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="espera">
+    <div id="pantalla">
+        <div id="texto-comando">EN ESPERA</div>
+        <button id="btn-ok">OK</button>
+    </div>
+
+    <script>
+        const socket = io();
+        const body = document.body;
+        const textoComando = document.getElementById('texto-comando');
+        const btnOk = document.getElementById('btn-ok');
+
+        // Alerta de sonido
+        const sonidoAlerta = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+
+        // --- NUEVO: Registrar la cámara ---
+        const nombreCamara = prompt("Ingrese nombre de su cámara (ej. cam1):");
+        if (nombreCamara) {
+            socket.emit('registrar_camara', nombreCamara);
+        }
+
+        // Recibir orden del servidor
+        socket.on('orden_camarografo', (data) => {
+            textoComando.innerText = data.accion;
+            body.className = data.estado;
+            sonidoAlerta.play().catch(e => console.log("Sonido bloqueado hasta interacción"));
+        });
+
+        // Enviar confirmación al productor
+        btnOk.addEventListener('click', () => {
+            sonidoAlerta.play(); // Esto desbloquea el sonido en algunos celulares
+            socket.emit('confirmacion_ok', { usuario: nombreCamara });
+            btnOk.innerText = "OK Enviado";
+            setTimeout(() => btnOk.innerText = "OK", 2000);
+        });
+    </script>
+</body>
+</html>
