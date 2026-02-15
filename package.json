@@ -1,7 +1,6 @@
 {
   "name": "intercom-app",
   "version": "1.0.0",
-  "description": "App de intercomunicacion",
   "main": "servidor.js",
   "scripts": {
     "start": "node servidor.js"
