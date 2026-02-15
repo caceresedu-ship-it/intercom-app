@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Productor</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
+        .boton-comando {
+            padding: 15px; margin: 5px; font-size: 16px; cursor: pointer;
+            border: none; color: white; border-radius: 5px;
+        }
+        .btn-aire { background-color: #ff0000; }
+        .btn-prev { background-color: #ffcc00; color: black; }
+        .btn-libre { background-color: #008000; }
+        .btn-otros { background-color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Panel de Control</h1>
+    
+    <div class="container">
+        <h3>Comandos A TODAS las cámaras</h3>
+        <button class="boton-comando btn-prev" onclick="enviar('PREVENIDO', 'prevenido', 'todos')">PREVENIDO</button>
+        <button class="boton-comando btn-aire" onclick="enviar('AL AIRE', 'al-aire', 'todos')">AL AIRE</button>
+        <button class="boton-comando btn-libre" onclick="enviar('LIBRE', 'espera', 'todos')">LIBRE</button>
+    </div>
+
+    <div class="container">
+        <h3>Comandos específicos (cam1, cam2, etc.)</h3>
+        <input type="text" id="destino" placeholder="Nombre de cámara">
+        <br><br>
+        <button class="boton-comando btn-prev" onclick="enviarIndependiente('PREVENIDO', 'prevenido')">Prev</button>
+        <button class="boton-comando btn-aire" onclick="enviarIndependiente('AL AIRE', 'al-aire')">Aire</button>
+        <button class="boton-comando btn-libre" onclick="enviarIndependiente('LIBRE', 'espera')">Libre</button>
+    </div>
+
+    <script>
+        // --- NUEVO: Login simple ---
+        const pass = prompt("Ingrese contraseña de productor:");
+        if (pass !== "1234") { // CONTRASEÑA: 1234
+            document.body.innerHTML = "<h1>Acceso Denegado</h1>";
+        } else {
+            const socket = io();
+
+            function enviar(accion, estado, destino) {
+                socket.emit('orden_productor', { accion: accion, estado: estado, camaraDestino: destino });
+            }
+
+            function enviarIndependiente(accion, estado) {
+                const destino = document.getElementById('destino').value;
+                if(destino) {
+                    enviar(accion, estado, destino);
+                } else {
+                    alert("Escriba el nombre de la cámara");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
